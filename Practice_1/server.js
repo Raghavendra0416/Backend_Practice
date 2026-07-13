@@ -22,7 +22,7 @@ http.createServer((request, response) => {
             body = Buffer.concat(body).toString();
 
             // Parse JSON if a body was sent
-            let parsed = {};
+            let parsed = {}; 
             if (body) {
                 try { parsed = JSON.parse(body); } catch (e) { }
             }
