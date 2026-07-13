@@ -2,8 +2,6 @@ const httpModule = require('http');
 const PORT = 8089;
 const log = console.log;
 
-
-
 //How to check the different requests and handle the different responses.
 const server = httpModule.createServer((req, res) => {
     const url = req.url;
