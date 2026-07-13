@@ -4,6 +4,8 @@
 //We need to run node filename for every change, so we have used nodemon, will will chack for the 
 //changes and it will run the server itself.
 
+//Add the file name in package.json to run with nodemon.
+
 const express = require("express"); //using http module behind the scenes
 const PORT = 8089;
 const server = express();
