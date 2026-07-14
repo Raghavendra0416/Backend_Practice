@@ -8,7 +8,7 @@
 3. After validation request will passed(using next()) to the Controller to perform the activity. The Controller consists of different functions to handle different requests. after handling the request the controller sends back the response.
 
 ### What does Index.js Consists?
-It consists of different imported middleware, controllers. 
+It consists of different imported routers,middleware, controllers. 
 - Index.js uses the middleware to validate the password/Auth.
 - Index.js uses Controllers to handle the request and response.
 
