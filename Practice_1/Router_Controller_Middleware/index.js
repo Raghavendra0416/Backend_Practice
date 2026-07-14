@@ -7,7 +7,7 @@ const PORT = 8089;
 const server = express();
 
 //Router handles Different api calls or routes
-server.get('/', passwordAuthMiddleware, HomeActivityRouter);
+server.use('/', passwordAuthMiddleware, HomeActivityRouter);
 
 //Router handles Different api calls or routes
 server.use('/api/v1/users', passwordAuthMiddleware, UserActivityRouter)
