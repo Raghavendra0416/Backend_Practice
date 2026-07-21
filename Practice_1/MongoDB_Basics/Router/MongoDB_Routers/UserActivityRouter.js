@@ -6,8 +6,7 @@ const {
     getUserById,
     updateUser,
     deleteUser
-} = require("../../Controller/UserController");
-
+} = require("../../Controller/MongoDB_Controller/UserActivityController");
 
 //Get All Users
 router.get("/", getAllUsers);

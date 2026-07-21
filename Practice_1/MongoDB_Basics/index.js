@@ -15,14 +15,18 @@ const DB_NAME = "Practice";
 const DB_Connection = DB_URL + DB_NAME;
 
 //Router handles Different api calls for pages
-server.use('/', passwordAuthMiddleware, HomeActivityRouter);
+//Not needed for now, read the information at the end.
+// server.use('/', passwordAuthMiddleware, HomeActivityRouter);
 
 //Router handles Different api calls for users
 // Disabling the below as we will be using MongoDB for users
 // server.use('/api/v1/users', passwordAuthMiddleware, UserActivityRouter); 
 
-//Routers to handle different api calls in MongoDB
 
+// Parses incoming JSON bodies into req.body
+server.use(express.json());
+
+//Routers to handle different api calls in MongoDB
 //Users router -> handaling data in MongoDB
 server.use('/api/v1/users', UserActivityRouter);
 
@@ -30,9 +34,10 @@ server.use('/api/v1/users', UserActivityRouter);
 server.use('/api/v1/blogs', BlogActivityRouter);
 
 
-// Connect to mongoose Database
+// Connect to mongoose Database 
 Mongoose.connect(DB_Connection).then(() => {
     console.log("Connected to MongoDB");
+    console.log("Connected to database:", Mongoose.connection.name); //To check connected database
 }).catch((err) => {
     console.log("Error COnnecting to MongoDB", err);
 })
@@ -43,4 +48,10 @@ server.listen(PORT, () => {
 })
 
 
-//To connect to MongoDB to Backend, we need install Mongoose. 
+//To connect to MongoDB to Backend, we need install Mongoose.
+
+
+// Express checks routes top to bottom and matches the first one that fits.
+// By putting your specific, no-middleware routes first,
+// requests to /api/v1/users and /api/v1/blogs get handled immediately — they never
+// reach the '/' catch-all with the middleware.

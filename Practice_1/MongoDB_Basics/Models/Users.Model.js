@@ -47,6 +47,6 @@ const userSchema = new mongoose.Schema(
 );
 
 // 3rd arg pins the collection name to lowercase "blogs" to match what you renamed it to
-const UserModel = mongoose.model("User", userSchema, "Users");
+const UserModel = mongoose.model("User", userSchema, "users");
 
 module.exports = UserModel;
