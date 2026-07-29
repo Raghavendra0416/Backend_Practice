@@ -1,3 +1,7 @@
+// In Controller we are performing 2 operations:
+// Validating input before performing DB operations.
+// CRUD operations in Db using services.
+
 const UserService = require("../../Services/UserService");
 const { validateUserInput, validateUserUpdate } = require("../../Validator/UserInputValidation");
 const isValidObjectId = require("../../utils/validateObjectId");
@@ -33,7 +37,7 @@ const getAllUsers = async (req, res) => {
 
 // READ one
 const getUserById = async (req, res) => {
-    // checks the data before returning response
+    // validating the data before returning response
     if (!isValidObjectId(req.params.id)) {
         return res.status(400).json({ error: "Invalid user ID format." });
     }
@@ -50,10 +54,12 @@ const getUserById = async (req, res) => {
 
 // UPDATE
 const updateUser = async (req, res) => {
+    // Validating ID provided by user
     if (!isValidObjectId(req.params.id)) {
         return res.status(400).json({ error: "Invalid user ID format." });
     }
 
+    // Validating the data, if Update required
     const result = validateUserUpdate(req.body);
     if (!result.success) {
         return res.status(400).json({

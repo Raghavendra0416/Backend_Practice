@@ -1,3 +1,8 @@
+// Performinig:
+//  CRUD operations -> like 
+// using models to validate and creating user and awaiting for response.
+// return the response to the controller
+
 const User = require("../../Models/Users.Model");
 
 // CREATE

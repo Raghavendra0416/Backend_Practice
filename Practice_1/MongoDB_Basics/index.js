@@ -1,3 +1,6 @@
+// This consists of:
+// Connection to mongoDB, CRUD operations for users in mongo DB(Blog not created).
+// 
 const express = require("express");
 const Mongoose = require("mongoose");
 
@@ -55,3 +58,9 @@ server.listen(PORT, () => {
 // By putting your specific, no-middleware routes first,
 // requests to /api/v1/users and /api/v1/blogs get handled immediately — they never
 // reach the '/' catch-all with the middleware.
+
+
+//Layers:
+// Request → Router → Middleware → Controller → Service → Model/DB
+
+// controllers should orchestrate business logic, not re-implement validation checks over and over.
