@@ -1,4 +1,4 @@
-# MongoDB Backend Practice Project
+# MVC Backend Practice Project
 
 A learning project built to understand backend fundamentals — Express.js, MongoDB/Mongoose, layered architecture (Router → Middleware → Controller → Service → Model), input validation with Zod, and full CRUD operations — using two resources: **Users** and **Blogs**.
 
