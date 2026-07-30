@@ -8,18 +8,21 @@ const {
     deleteBlog
 } = require("../../Controller/MongoDB_Controller/BlogActivityController");
 
+const validateBody = require("../../Middleware/validateBody");
+const validateId = require("../../Middleware/validateId");
+const { validateBlogInput, validateBlogUpdate } = require("../../Validator/BlogInputValidation");
+
+// Create a new blog
+router.post("/", validateBody(validateBlogInput), createBlog);
 // Get All Blogs
 router.get("/", getAllBlogs);
 // Get Blogs By ID
-router.get("/:id", getBlogById);
-
-// Create a new blog
-router.post("/", createBlog);
+router.get("/:id", validateId, getBlogById);
 
 // Update Blog
-router.put("/:id", updateBlog);
+router.put("/:id", validateId, validateBody(validateBlogUpdate), updateBlog);
 
 // Delete Blog
-router.delete("/:id", deleteBlog);
+router.delete("/:id", validateId, deleteBlog);
 
 module.exports = router;

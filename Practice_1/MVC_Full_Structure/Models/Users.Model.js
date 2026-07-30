@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema(
     { timestamps: true } // adds createdAt and updatedAt automatically
 );
 
-// 3rd arg pins the collection name to lowercase "blogs" to match what you renamed it to
+// 3rd arg pins the collection name to lowercase "users" to match what you renamed it to
 const UserModel = mongoose.model("User", userSchema, "users");
 
 module.exports = UserModel;
