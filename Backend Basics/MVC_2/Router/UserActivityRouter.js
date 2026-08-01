@@ -12,6 +12,7 @@ const {
 const validateBody = require("../Middleware/validateBody");
 const validateId = require("../Middleware/validateId");
 const { validateUserInput, validateUserUpdate } = require("../Validator/UserInputValidation");
+const protect = require("../Middleware/authMiddleware");
 
 // Create new User or Post User 
 router.post("/", validateBody(validateUserInput), createUser);
@@ -20,10 +21,11 @@ router.get("/", getAllUsers);
 //Get User By iD
 router.get("/:id", validateId, getUserById);
 
+// protect - now make sures that require a valid token before these two run 
 // Update the existing User details
-router.put("/:id", validateId, validateBody(validateUserUpdate), updateUser);
+router.put("/:id", protect, validateId, validateBody(validateUserUpdate), updateUser);
 
 //Delete the existing User
-router.delete("/:id", validateId, deleteUser);
+router.delete("/:id", protect, validateId, deleteUser);
 
 module.exports = router;

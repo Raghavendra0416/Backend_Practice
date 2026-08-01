@@ -11,6 +11,7 @@ const {
 const validateBody = require("../Middleware/validateBody");
 const validateId = require("../Middleware/validateId");
 const { validateBlogInput, validateBlogUpdate } = require("../Validator/BlogInputValidation");
+const protect = require("../Middleware/authMiddleware");
 
 // Create a new blog
 router.post("/", validateBody(validateBlogInput), createBlog);
@@ -20,9 +21,9 @@ router.get("/", getAllBlogs);
 router.get("/:id", validateId, getBlogById);
 
 // Update Blog
-router.put("/:id", validateId, validateBody(validateBlogUpdate), updateBlog);
+router.put("/:id", protect, validateId, validateBody(validateBlogUpdate), updateBlog);
 
 // Delete Blog
-router.delete("/:id", validateId, deleteBlog);
+router.delete("/:id", protect, validateId, deleteBlog);
 
 module.exports = router;

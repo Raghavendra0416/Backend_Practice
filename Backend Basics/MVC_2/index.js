@@ -1,8 +1,12 @@
+require("dotenv").config(); // must be the very first line, before anything reads process.env
+
 const express = require("express");
 const Mongoose = require("mongoose");
 
 const UserActivityRouter = require("./Router/UserActivityRouter");
 const BlogActivityRouter = require("./Router/BlogActivityRouter");
+const AuthRouter = require("./Router/AuthRouter");
+
 const errorHandler = require("./Middleware/errorHandler");
 
 
@@ -17,10 +21,13 @@ const DB_Connection = DB_URL + DB_NAME;
 server.use(express.json());
 
 //Routers to handle different api calls in MongoDB
-//Users router -> handaling data in MongoDB
+// Auth Router -> handles the tokens
+server.use('/api/v1/auth', AuthRouter);
+
+//Users router -> handling data in MongoDB
 server.use('/api/v1/users', UserActivityRouter);
 
-//Blog Router -> handaling data in MongoDB
+//Blog Router -> handling data in MongoDB
 server.use('/api/v1/blogs', BlogActivityRouter);
 
 // Centralized error handler — MUST be registered after all routes
@@ -49,6 +56,11 @@ server.listen(PORT, () => {
 
 //Layers:
 // Request → Router → Middleware → Controller → Service → Model/DB
+
+// Error Files:
+// AppError = a labeled envelope you can throw from anywhere in your code, with a status code and message already attached
+// asyncHandler = the mail carrier that catches any thrown envelope(or rejected promise) and forwards it onward
+// errorHandler = the sorting office at the very end that opens every envelope, reads the label, and sends back the appropriate response
 
 
 // If there is a dupicate input passed by user.

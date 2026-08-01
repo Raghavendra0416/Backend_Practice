@@ -25,6 +25,15 @@ function errorHandler(err, req, res, next) {
         message = Object.values(err.errors).map(e => e.message).join(", ");
     }
 
+    if (err.name === "JsonWebTokenError") {
+        statusCode = 401;
+        message = "Invalid token. Please log in again.";
+    }
+    if (err.name === "TokenExpiredError") {
+        statusCode = 401;
+        message = "Your session has expired. Please log in again.";
+    }
+
     // Log the full error server-side ONLY — never send this to the client
     console.error(err);
 

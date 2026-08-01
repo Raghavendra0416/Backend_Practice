@@ -5,6 +5,7 @@
 const UserService = require("../Services/UserService");
 //To control the errors(instead of repeating same logic)
 const asyncHandler = require("../utils/asyncHandler");
+const AppError = require("../utils/AppError");
 
 // CREATE
 const createUser = asyncHandler(async (req, res) => {
@@ -22,7 +23,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
 const getUserById = asyncHandler(async (req, res) => {
     const user = await UserService.getUserById(req.params.id);
     if (!user) {
-        return res.status(404).json({ error: "User not found" });
+        throw new AppError("User not found", 404);
     }
     res.status(200).json(user);
 });
@@ -31,7 +32,7 @@ const getUserById = asyncHandler(async (req, res) => {
 const updateUser = asyncHandler(async (req, res) => {
     const user = await UserService.updateUser(req.params.id, req.validatedBody);
     if (!user) {
-        return res.status(404).json({ error: "User not found" });
+        throw new AppError("User not found", 404);
     }
     res.status(200).json(user);
 });
@@ -39,6 +40,7 @@ const updateUser = asyncHandler(async (req, res) => {
 // DELETE
 const deleteUser = asyncHandler(async (req, res) => {
     const user = await UserService.deleteUser(req.params.id);
+    // Not using app error and leaving like this just for example.
     if (!user) {
         return res.status(404).json({ error: "User not found" });
     }
