@@ -7,18 +7,22 @@ A learning project built to understand backend fundamentals — Express.js, Mong
 ## Table of Contents
 
 1. [Aim of the Project](#aim-of-the-project)
-2. [What This Project Does](#what-this-project-does)
-3. [Insights & Issues Encountered](#insights--issues-encountered)
-4. [Technologies & Topics Covered](#technologies--topics-covered)
-5. [Prerequisites](#prerequisites)
-6. [How to Start the Project](#how-to-start-the-project)
-7. [Data Flow](#data-flow)
-8. [Folder Structure](#folder-structure)
-9. [File-by-File Breakdown](#file-by-file-breakdown)
-10. [Expected Inputs](#expected-inputs)
-11. [Expected Outputs](#expected-outputs)
-12. [Where to Send Requests & Check Responses](#where-to-send-requests--check-responses)
-13. [Pending Topics / Not Yet Implemented](#pending-topics--not-yet-implemented)
+2. [Use of the Project](#use-of-the-project)
+3. [What This Project Does](#what-this-project-does)
+4. [What This Project Provides](#what-this-project-provides)
+5. [Insights Gained](#insights-gained)
+6. [Issues Encountered While Working on the Project](#issues-encountered-while-working-on-the-project)
+7. [Technologies & Topics Covered](#technologies--topics-covered)
+8. [Prerequisites](#prerequisites)
+9. [How to Start the Project](#how-to-start-the-project)
+10. [Data Flow](#data-flow)
+11. [Folder Structure](#folder-structure)
+12. [What Each Folder Does](#what-each-folder-does)
+13. [File-by-File Breakdown](#file-by-file-breakdown)
+14. [Expected Inputs](#expected-inputs)
+15. [Expected Outputs](#expected-outputs)
+16. [Where to Send Requests & Check Responses](#where-to-send-requests--check-responses)
+17. [Pending Topics / Not Yet Implemented](#pending-topics--not-yet-implemented)
 
 ---
 
@@ -34,6 +38,17 @@ This project is **not** meant to be a production-ready application. It's a hands
 - How JWT-based authentication and password hashing actually work under the hood
 - Why real backends organize code the way they do (routers, middleware, controllers, services, models)
 
+## Use of the Project
+
+Practically, this project serves as:
+
+- **A personal reference implementation** to look back at when starting a new backend project — a working example of how to structure routers, middleware, controllers, services, and models together, rather than starting from a blank file every time.
+- **A safe sandbox for testing backend concepts** (validation, error handling, authentication) without the pressure of a real client, deadline, or production data.
+- **A base to extend** — new resources (e.g. "Comments," "Categories") can be added by copying the existing Users/Blogs pattern: a Model, a Validator, a Service, a Controller, and a Router.
+- **A debugging practice ground** — most of the real learning in this project came from hitting genuine errors (case-sensitive collection names, missing middleware, version-specific breaking changes) and tracing them back to a root cause, which mirrors real day-to-day backend work far more than following a tutorial passively.
+
+It is not intended to be deployed or used by real end users — it has no frontend, and several production concerns (rate limiting, ownership checks, logging) are still open, as listed under [Pending Topics](#pending-topics--not-yet-implemented).
+
 ## What This Project Does
 
 - Exposes a REST API with two resources: **Users** and **Blogs**, plus an **Auth** resource for register/login
@@ -45,7 +60,18 @@ This project is **not** meant to be a production-ready application. It's a hands
 - Catches every error — from Mongoose, from JWT verification, or thrown deliberately in application code — through a single centralized error handler, returning consistent JSON with the correct HTTP status code
 - Connects to a **local MongoDB instance** (via MongoDB Compass / `mongod`) and stores/retrieves real data
 
-## Insights & Issues Encountered
+## What This Project Provides
+
+Concretely, once running, this project provides:
+
+- A live REST API server, listening on `http://localhost:8089`
+- 12 working endpoints across 3 resources (Auth, Users, Blogs) — see the [full table](#where-to-send-requests--check-responses)
+- Real, persisted data in a local MongoDB database (`Practice`), inspectable at any time via MongoDB Compass or `mongosh`
+- Consistent, predictable JSON responses for every success and failure case — no raw stack traces or inconsistent error shapes reach the client
+- A reusable set of building blocks (`asyncHandler`, `AppError`, `errorHandler`, `validateBody`, `validateId`, `protect`) that can be copied directly into a new project as a starting point
+- A working example of secure password storage (bcrypt) and stateless authentication (JWT) that can be studied independently of the rest of the app
+
+## Insights Gained
 
 Working through this project surfaced several real, practical lessons — including bugs that were actually hit and fixed during development, not just theoretical warnings.
 
@@ -66,6 +92,22 @@ Working through this project surfaced several real, practical lessons — includ
 - **Mongoose 9 removed `next()` callbacks from `pre()` hooks entirely.** Code that worked in Mongoose 8 (`schema.pre("save", function(next) { ...; next(); })`) throws `TypeError: next is not a function` in Mongoose 9, since `next` is no longer passed as an argument. The fix is to use a plain `async function()` with no `next` parameter, and just `return`/`throw` instead of calling a callback.
 - **The `Authorization` header must be formatted exactly as `Bearer <token>`**, with the literal word "Bearer" and a single space before the token. Pasting just the raw token (or the wrong value, like the JWT secret itself) causes two different, easily-confused failures: no "Bearer " prefix → `"Not authorized, no token provided"`; a malformed token value → `"Invalid token, please log in again"` (`jwt malformed`).
 - **`select: false` on the `password` field affects queries (`find`, `findById`, `findOne`) but not documents already in memory** (e.g. the result of `.create()`). The password must still be manually stripped from the response object in the controller before sending it back, even with `select: false` set on the schema.
+
+## Issues Encountered While Working on the Project
+
+This is a chronological log of real bugs hit during development, how they were noticed, and how each was fixed — kept here so the same mistakes aren't repeated on future projects.
+
+| # | Issue | Symptom | Root Cause | Fix |
+|---|---|---|---|---|
+| 1 | Collection name case mismatch | `GET /users` returned an empty array despite Compass showing data existed | Mongoose model pinned to collection `"Users"` while the real data lived in `"users"` (MongoDB collection names are case-sensitive) | Renamed the collection / corrected the third argument of `mongoose.model()` to match exactly |
+| 2 | Wrong connection string | Data appeared to "disappear" after seeding | `DB_URL + DB_NAME` concatenation was missing a `/`, producing an invalid URI, silently defaulting to the `test` database | Fixed string concatenation to `DB_URL + "/" + DB_NAME` |
+| 3 | Missing `express.json()` | Every `POST` failed Zod validation, saying all fields were "required," even with a full JSON body sent in Postman | `req.body` was never parsed without the `express.json()` middleware — it stayed `{}` | Added `server.use(express.json())` before mounting any routers |
+| 4 | Catch-all route order | `GET /api/v1/users` returned a 401 "Unauthorized" from unrelated middleware | `server.use('/', passwordAuthMiddleware, ...)` matches every path, and was registered before the specific `/api/v1/users` route | Removed the catch-all, or reordered specific routes before catch-alls |
+| 5 | `next()` removed in Mongoose 9 | `pre("save")` hook threw `TypeError: next is not a function` | Mongoose 9 dropped callback-style (`next`) middleware entirely — only async/await or promise-returning functions are supported now | Rewrote the hook as `async function()` with no `next` parameter, using `return`/`throw` instead |
+| 6 | `dotenv` not loaded | `jsonwebtoken` threw `"secretOrPrivateKey must have a value"` | The old `PasswordAuthMiddleware.js` (deleted during cleanup) was the only file calling `require('dotenv').config()` — nothing replaced it in `index.js` | Added `require('dotenv').config()` as the very first line of `index.js` |
+| 7 | Malformed `Authorization` header | `protect` middleware rejected valid login attempts with confusing errors | Header value was missing the required `"Bearer "` prefix, or the wrong string (e.g. the JWT secret) was pasted instead of the actual token | Used Postman's Authorization tab → Bearer Token, or manually typed `Bearer <token>` with the correct token value |
+| 8 | Raw stack traces exposed to client | A duplicate-email `POST` returned a full HTML page with an internal file system path and stack trace | No centralized error handler existed yet; Express fell back to its default HTML error page | Built `errorHandler.js` + `AppError` + `asyncHandler` (Stage 2) to catch and format every error consistently |
+| 9 | Broken `require()` paths after folder cleanup | `node index.js` failed to start after removing nested `MongoDB_Controller`/`MongoDB_Routers` subfolders | Several files still referenced the old nested paths (e.g. `require("./Services/BlogService")` instead of `require("../Services/BlogService")`) | Manually traced and corrected each relative import path to match the new flat structure |
 
 ## Technologies & Topics Covered
 
@@ -259,6 +301,18 @@ MVC_2/
 ├── package.json
 └── README.md
 ```
+
+## What Each Folder Does
+
+| Folder | Responsibility |
+|---|---|
+| `Controller/` | Handles the HTTP layer only — receives the request, calls the matching `Service` function, sets the response status code and JSON shape. Contains no direct database queries and no `try/catch` (handled by `asyncHandler`). |
+| `Middleware/` | Cross-cutting logic that runs *before* a controller: authentication (`authMiddleware.js`), input validation (`validateBody.js`, `validateId.js`), and centralized error formatting (`errorHandler.js`). Anything here can stop a request early. |
+| `Models/` | Mongoose schema definitions — field types, required rules, unique indexes, and any schema-level hooks (e.g. password hashing). This is the single source of truth for what a "User" or "Blog" document looks like, and the last line of defense if validation is somehow bypassed elsewhere. |
+| `Router/` | Wires URLs and HTTP methods (`GET`, `POST`, `PUT`, `DELETE`) to the correct sequence of middleware and controller functions. Defines *what exists* at each endpoint, not *how* it behaves. |
+| `Services/` | The business logic layer — talks directly to the Mongoose models, contains no knowledge of `req`/`res`/HTTP at all. This separation means the same logic could be reused outside of Express (e.g. a CLI script) without changes. |
+| `Validator/` | Zod schemas describing the exact shape expected for each kind of request body (create vs. update vs. login), plus the functions that run `safeParse()` against them. |
+| `utils/` | Small, reusable, framework-agnostic helper functions and classes used across multiple layers — `asyncHandler`, `AppError`, `generateToken`, `validateObjectId`. Nothing in here is specific to Users or Blogs. |
 
 ## File-by-File Breakdown
 
