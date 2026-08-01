@@ -3,6 +3,7 @@ const Mongoose = require("mongoose");
 
 const UserActivityRouter = require("./Router/UserActivityRouter");
 const BlogActivityRouter = require("./Router/BlogActivityRouter");
+const errorHandler = require("./Middleware/errorHandler");
 
 
 const PORT = 8089;
@@ -22,6 +23,8 @@ server.use('/api/v1/users', UserActivityRouter);
 //Blog Router -> handaling data in MongoDB
 server.use('/api/v1/blogs', BlogActivityRouter);
 
+// Centralized error handler — MUST be registered after all routes
+server.use(errorHandler);
 
 // Connect to mongoose Database 
 Mongoose.connect(DB_Connection).then(() => {
@@ -37,16 +40,25 @@ server.listen(PORT, () => {
 })
 
 
-//To connect to MongoDB to Backend, we need install Mongoose.
-
+//To connect to MongoDB to Backend, install Mongoose.
 
 // Express checks routes top to bottom and matches the first one that fits.
 // By putting your specific, no-middleware routes first,
 // requests to /api/v1/users and /api/v1/blogs get handled immediately — they never
 // reach the '/' catch-all with the middleware.
 
-
 //Layers:
 // Request → Router → Middleware → Controller → Service → Model/DB
 
-// controllers should orchestrate business logic, not re-implement validation checks over and over.
+
+// If there is a dupicate input passed by user.
+// Then here's the actual sequence of events that will happen:
+// 1. Request comes in → hits your route
+// 2. validateId / validateBody middleware run(if any)
+// 3. Controller function runs
+// 4. Inside the controller, UserService.createUser() is called
+// 5. Mongoose tries to insert into MongoDB → MongoDB rejects(duplicate key)
+// 6. This rejection becomes a * rejected Promise * inside your async function
+// 7. asyncHandler's .catch(next) catches it and calls next(err)
+// 8. Express now looks for the NEXT matching middleware in its chain — specifically, the next one with 4 parameters(an error handler)
+// 9. It skips over any remaining NORMAL routes / middleware entirely, and jumps straight to your errorHandler

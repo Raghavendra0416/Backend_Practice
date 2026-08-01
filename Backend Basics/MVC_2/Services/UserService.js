@@ -3,7 +3,7 @@
 // using models to validate and creating user and awaiting for response.
 // return the response to the controller
 
-const User = require("../../Models/Users.Model");
+const User = require("../Models/Users.Model");
 
 // CREATE
 const createUser = async (userData) => {
@@ -40,3 +40,4 @@ module.exports = {
     updateUser,
     deleteUser
 };
+
