@@ -1,4 +1,4 @@
-# MongoDB Backend Practice Project (MVC Part 2)
+# MVC (Express, MongoDB, Auth) Backend Practice Project 
 
 A learning project built to understand backend fundamentals — Express.js, MongoDB/Mongoose, layered architecture (Router → Middleware → Controller → Service → Model), input validation with Zod, centralized error handling, and JWT-based authentication — using two resources: **Users** and **Blogs**.
 
